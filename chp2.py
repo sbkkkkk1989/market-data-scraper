@@ -10,6 +10,7 @@ import glob
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
@@ -34,8 +35,46 @@ from google.oauth2.service_account import Credentials
 def main_crawler():
     today_str = datetime.datetime.now().strftime('%Y%m%d')
     file_today = f"market_data_report_{today_str}.xlsx"
-    # 크롬 드라이버 실행
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+
+    # --- WebDriver 옵션 설정 시작 ---
+    chrome_options = Options()
+
+    # 1. Headless 모드 활성화
+    chrome_options.add_argument("--headless")
+
+    # 2. 샌드박스 비활성화 (Linux/Docker 환경에서 종종 필요)
+    # GitHub Actions는 Linux 기반이므로 추가하는 것이 좋습니다.
+    chrome_options.add_argument("--no-sandbox")
+
+    # 3. /dev/shm 사용 비활성화 (리소스 제한적인 Docker 환경에서 크래시 방지)
+    # GitHub Actions 환경에서도 도움이 될 수 있습니다.
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # 4. GPU 가속 비활성화 (Headless 모드에서 불필요하거나 문제를 일으킬 수 있음)
+    chrome_options.add_argument("--disable-gpu") # 선택 사항이지만, headless에서 종종 사용됨
+
+    # 5. 가상 윈도우 크기 설정 (웹페이지 레이아웃에 영향)
+    # 특정 해상도에서 웹사이트가 다르게 보일 수 있으므로,
+    # 로컬에서 테스트하던 해상도와 유사하게 설정하면 예기치 않은 문제를 줄일 수 있습니다.
+    chrome_options.add_argument("--window-size=1920,1080") # 예시 해상도
+
+    # 6. 사용자 에이전트 설정 (선택 사항)
+    # 일부 웹사이트는 특정 브라우저나 환경을 감지하여 다르게 동작할 수 있습니다.
+    # 필요하다면 일반적인 데스크톱 브라우저의 User-Agent로 설정할 수 있습니다.
+    # user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36"
+    # chrome_options.add_argument(f'user-agent={user_agent}')
+
+    # --- WebDriver 옵션 설정 끝 ---
+
+    # 크롬 드라이버 실행 (수정된 부분)
+    print("Initializing Chrome WebDriver with options...")
+    try:
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        print("WebDriver initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing WebDriver: {e}")
+        # WebDriver 초기화 실패 시, 여기서 더 진행하기 어려우므로 예외를 다시 발생시키거나 프로그램을 종료할 수 있습니다.
+        raise
 
     # 1. 만기요약(ExpirySummary) 크롤링 및 가공
     df_expiry = get_expiry_summary(driver, TICKERS)
@@ -156,7 +195,7 @@ TICKERS_TO_EXCLUDE_FROM_PRICES = ['VIX']
 HISTORICAL_DATA_PERIOD = '1y'
 OPTION_CHAIN_MAX_EXPIRY_DAYS = 183
 
-GOOGLE_API_KEY_FILE = r"C:\Users\masri\OneDrive\바탕 화면\GG download\sb.json"
+GOOGLE_API_KEY_FILE = "sb.json"
 GOOGLE_SHEET_ID = "12g_bvrzg-3PWA3zzIUsIdhIlKbDn_BMv9zRi53VfFQQ"
 SAVE_TO_GOOGLE_SHEETS = True
 
