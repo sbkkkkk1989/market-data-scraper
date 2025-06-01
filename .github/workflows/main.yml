@@ -1,0 +1,54 @@
+# .github/workflows/main.yml
+
+name: Run Market Data Scraper and Upload # 워크플로우의 이름 (GitHub Actions 탭에 표시됨)
+
+on:
+  schedule:
+    # UTC 기준으로 매일 두 번 실행합니다.
+    # 예시1: 매일 00:00 UTC 및 12:00 UTC (한국 시간 오전 9시, 오후 9시)
+    - cron: '0 0,12 * * *'
+
+    # 예시2: 한국 시간으로 오전 8시, 오후 8시에 실행하고 싶다면
+    # UTC로는 전날 23:00, 당일 11:00 가 됩니다.
+    # - cron: '0 23 * * *'  # 매일 23:00 UTC (KST 다음날 오전 8시)
+    # - cron: '0 11 * * *'  # 매일 11:00 UTC (KST 오후 8시)
+    # 원하는 시간으로 위 cron 표현식을 수정하세요. (주석 처리된 예시 중 하나를 선택하거나 새로 작성)
+
+  workflow_dispatch: # GitHub Actions 탭에서 "Run workflow" 버튼으로 수동 실행을 가능하게 함
+
+jobs:
+  scrape_and_upload: # 작업(job)의 ID (자유롭게 지정 가능)
+    runs-on: ubuntu-latest # 작업이 실행될 환경 (Linux 최신 버전)
+
+    steps: # 작업 내에서 순차적으로 실행될 단계들
+      - name: Checkout repository content # 1단계: 저장소 코드 가져오기
+        uses: actions/checkout@v4 # GitHub에서 제공하는 공식 액션 사용
+
+      - name: Set up Python # 2단계: Python 환경 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9' # 스크립트와 호환되는 Python 버전 명시 (예: '3.8', '3.9', '3.10', '3.11')
+
+      - name: Install Google Chrome # 3단계: Selenium을 위한 Chrome 브라우저 설치
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install dependencies # 4단계: requirements.txt 에 명시된 라이브러리 설치
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create Google Credentials File from Secret # 5단계: GitHub Secret에서 API 키 파일 생성
+        # GOOGLE_CREDENTIALS 라는 Secret의 내용을 sb.json 파일로 저장
+        # chp2.py 에서 GOOGLE_API_KEY_FILE = "sb.json" 으로 설정한 것과 일치해야 함
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS }}" > sb.json
+
+      - name: Run Python script # 6단계: 메인 Python 스크립트 실행
+        env: # 스크립트 실행 시 사용할 환경 변수 (선택 사항)
+          PYTHONIOENCODING: "UTF-8" # 한글 인코딩 문제 방지 (필요한 경우)
+        run: python chp2.py # chp2.py 스크립트 실행
+
+      - name: Clean up Google Credentials File # 7단계: 보안을 위해 작업 후 API 키 파일 삭제
+        if: always() # 이전 단계의 성공/실패 여부와 관계없이 항상 실행
+        run: rm -f sb.json
