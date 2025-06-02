@@ -15,6 +15,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 #from webdriver_manager.chrome import ChromeDriverManager
 import yfinance as yf
+import requests_cache
+
 
 from signals import (
     extract_oi_volume_signal,
@@ -321,14 +323,23 @@ def get_historical_prices(tickers, period, tickers_to_exclude):
     all_data = []
     tickers_for_download = [t for t in tickers if t not in tickers_to_exclude]
 
+    # --- User-Agent 및 세션 설정 추가 ---
+    session = requests_cache.CachedSession('yfinance.cache')
+    session.headers['User-agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    # --- 설정 끝 ---
+
     for ticker in tickers_for_download:
         print(f"[{ticker}] 데이터 다운로드 중 (기간: {period})...")
         try:
-            df = yf.download(ticker, period=period, progress=False, auto_adjust=True)
+            # --- yf.download 호출 시 session 전달 ---
+            df = yf.download(ticker, period=period, progress=False, auto_adjust=True, session=session)
+            # --- 수정 끝 ---
             if df.empty:
                 print(f"  -> {ticker}: 데이터 없음, 건너뜀")
                 continue
             df['Ticker'] = ticker
+            # ... (이하 동일) ...
+
             df['MA20'] = df['Close'].rolling(window=20, min_periods=1).mean()
             df['ATR14_simple'] = (df['High'] - df['Low']).rolling(window=14, min_periods=1).mean()
             df_reset = df.reset_index()
