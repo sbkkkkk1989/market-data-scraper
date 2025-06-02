@@ -43,6 +43,6 @@ tzdata==2025.1
 urllib3==2.3.0
 webdriver-manager==4.0.1
 wsproto==1.2.0
-yfinance==0.2.44
+yfinance==0.2.61
 # requirements.txt 에 추가
 requests_cache
