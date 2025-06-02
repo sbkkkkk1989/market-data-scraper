@@ -30,7 +30,7 @@ jobs:
           python-version: '3.9' # 스크립트와 호환되는 Python 버전 명시 (예: '3.8', '3.9', '3.10', '3.11')
 
       - name: Set up Chrome # << 이 액션으로 대체
-        uses: nanasess/setup-chrome@v2
+        uses: browser-actions/setup-chrome@latest
 
       - name: Install dependencies # 4단계: requirements.txt 에 명시된 라이브러리 설치
         run: |
