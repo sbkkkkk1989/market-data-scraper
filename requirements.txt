@@ -29,7 +29,6 @@ pandas==2.0.3  # pandas가 numpy에 의존하므로, pandas 버전도 확인 필
 peewee==3.17.6
 pyOpenSSL==24.2.1
 pyarrow==17.0.0
-pycparser==2.23
 PySocks==1.7.1
 python-dateutil==2.9.0.post0
 pytz==2025.1
