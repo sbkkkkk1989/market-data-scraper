@@ -13,7 +13,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+#from webdriver_manager.chrome import ChromeDriverManager
 import yfinance as yf
 
 from signals import (
@@ -70,10 +70,12 @@ def main_crawler():
     print("Initializing Chrome WebDriver with options...")
     try:
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-        print("WebDriver initialized successfully.")
+        driver = webdriver.Chrome(options=chrome_options)
+        print("WebDriver initialized successfully (using system chromedriver).")
     except Exception as e:
-        print(f"Error initializing WebDriver: {e}")
-        # WebDriver 초기화 실패 시, 여기서 더 진행하기 어려우므로 예외를 다시 발생시키거나 프로그램을 종료할 수 있습니다.
+        print(f"Error initializing WebDriver with system chromedriver: {e}")
+        print("WebDriver initialized successfully.")
+            # WebDriver 초기화 실패 시, 여기서 더 진행하기 어려우므로 예외를 다시 발생시키거나 프로그램을 종료할 수 있습니다.
         raise
 
     # 1. 만기요약(ExpirySummary) 크롤링 및 가공
