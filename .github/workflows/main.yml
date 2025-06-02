@@ -29,22 +29,8 @@ jobs:
         with:
           python-version: '3.9' # 스크립트와 호환되는 Python 버전 명시 (예: '3.8', '3.9', '3.10', '3.11')
 
-      - name: Install Google Chrome # 3단계: Selenium을 위한 Chrome 브라우저 설치
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-
-      - name: Install ChromeDriver # << 이 단계 추가
-        run: |
-          CHROME_VERSION=$(google-chrome --version | cut -f 3 -d ' ' | cut -d '.' -f 1)
-          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION})
-          wget -N https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip -P ~/
-          unzip ~/chromedriver_linux64.zip -d ~/
-          rm ~/chromedriver_linux64.zip
-          sudo mv -f ~/chromedriver /usr/local/bin/chromedriver
-          sudo chown root:root /usr/local/bin/chromedriver
-          sudo chmod 0755 /usr/local/bin/chromedriver
-
+      - name: Set up Chrome # << 이 액션으로 대체
+        uses: nanasess/setup-chrome@v2
 
       - name: Install dependencies # 4단계: requirements.txt 에 명시된 라이브러리 설치
         run: |
