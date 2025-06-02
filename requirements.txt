@@ -25,7 +25,7 @@ multitasking==0.0.11
 numpy==1.26.4  # <-- 이렇게 변경합니다.
 oauthlib==3.2.2
 openpyxl==3.1.5
-pandas==2.2.4  # pandas가 numpy에 의존하므로, pandas 버전도 확인 필요
+pandas==2.0.3  # pandas가 numpy에 의존하므로, pandas 버전도 확인 필요
 peewee==3.17.6
 pyOpenSSL==24.2.1
 pyarrow==17.0.0
