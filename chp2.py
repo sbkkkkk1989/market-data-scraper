@@ -69,13 +69,12 @@ def main_crawler():
     # 크롬 드라이버 실행 (수정된 부분)
     print("Initializing Chrome WebDriver with options...")
     try:
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        # 시스템 PATH에 있는 ChromeDriver를 사용하도록 설정
         driver = webdriver.Chrome(options=chrome_options)
         print("WebDriver initialized successfully (using system chromedriver).")
     except Exception as e:
         print(f"Error initializing WebDriver with system chromedriver: {e}")
-        print("WebDriver initialized successfully.")
-            # WebDriver 초기화 실패 시, 여기서 더 진행하기 어려우므로 예외를 다시 발생시키거나 프로그램을 종료할 수 있습니다.
+        # WebDriver 초기화 실패 시, 여기서 더 진행하기 어려우므로 예외를 다시 발생시킵니다.
         raise
 
     # 1. 만기요약(ExpirySummary) 크롤링 및 가공
